@@ -2,7 +2,7 @@ package data;
 
 import data.Utils;
 
-typedef Room = {
+typedef RoomPlan = {
     var x:Int;
     var y:Int;
     var connects:Array<Dir>;
@@ -12,7 +12,7 @@ typedef Room = {
 }
 
 class FloorMap {
-    var rooms:Array<Array<Room>>;
+    var rooms:Array<Array<RoomPlan>>;
     var start:Vec2;
     var size:Int;
     var minLength:Int;
@@ -44,7 +44,7 @@ class FloorMap {
 
     // create the stats for this room.
     function expandRoom (roomVec2:Vec2, depth:Int) { 
-        final curRoom:Room = rooms[roomVec2.x][roomVec2.y];
+        final curRoom:RoomPlan = rooms[roomVec2.x][roomVec2.y];
         curRoom.depth = depth;
         curRoom.start = depth == 0;
 
@@ -80,7 +80,7 @@ class FloorMap {
         }
     }
 
-    public function getRoom (vec2:Vec2): Null<Room> {
+    public function getRoom (vec2:Vec2): Null<RoomPlan> {
         if (vec2.x < 0 || vec2.x >= size || vec2.y < 0 || vec2.y >= size) {
             return null;
         }
