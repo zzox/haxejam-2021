@@ -1,7 +1,6 @@
 package objects;
 
 import flixel.FlxG;
-import flixel.util.FlxColor;
 import flixel.FlxSprite;
 
 typedef HoldsObj = {
@@ -24,14 +23,24 @@ class Player extends FlxSprite {
         down: 0.
     };
 
-    public function new (x:Float, y:Float) {
+    var scene:PlayState;
+
+    public function new (x:Float, y:Float, scene:PlayState) {
         super(x, y);
 
         makeGraphic(8, 12, 0xfffdf6e3);
+
+        this.scene = scene;
     }
 
     override public function update (elapsed:Float) {
-        handleInputs(elapsed);
+        if (scene.movingRoom) {
+            // TODO: play running/walking anim
+            lrVel = 0;
+            udVel = 0;
+        } else {
+            handleInputs(elapsed);
+        }
 
         velocity.set(lrVel * VELOCITY, udVel * VELOCITY);
 
@@ -46,7 +55,7 @@ class Player extends FlxSprite {
             left: FlxG.keys.pressed.LEFT,
             right: FlxG.keys.pressed.RIGHT,
             up: FlxG.keys.pressed.UP,
-            down: FlxG.keys.pressed.DOWN,
+            down: FlxG.keys.pressed.DOWN
         }
 
         lrVel = 0;
