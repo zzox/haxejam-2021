@@ -21,7 +21,7 @@ typedef Room = {
 }
 
 class PlayState extends FlxState {
-    static final MOVE_ROOM_TIME = 1.0;
+    static final MOVE_ROOM_TIME = 0.66;
     static final HUD_HEIGHT = 16;
     static final ROOM_SIZE = { width: 192, height: 144 };
     static final DIRS = [Left, Right, Up, Down];
@@ -36,10 +36,7 @@ class PlayState extends FlxState {
         super.create();
 
         camera.pixelPerfectRender = true;
-        bgColor = 0xff002b36;
-
-        player = new Player(0, 0, this);
-        add(player);
+        bgColor = 0xff073642;
 
         // MD:
         final size = 2;
@@ -54,6 +51,14 @@ class PlayState extends FlxState {
                 final room = map.getRoom({ x: x, y: y });
                 final walls = new FlxTypedGroup<FlxTilemap>();
 
+                final roomTilemap = new TiledMap(AssetPaths.room_empty_1__tmx);
+                // floor
+                add(createTileLayer(roomTilemap, 'ground', { x: x * ROOM_SIZE.width, y: y * ROOM_SIZE.height }));
+                // collidable items
+                walls.add(createTileLayer(roomTilemap, 'walls', { x: x * ROOM_SIZE.width, y: y * ROOM_SIZE.height }));
+
+                // TODO: add item squares positions to Room obj
+
                 // add open or closed walls
                 for (dir in DIRS) {
                     final mapUri = MapUtils.getMapByType(dir, room.connects.contains(dir));
@@ -62,6 +67,7 @@ class PlayState extends FlxState {
                     final chunkPos = MapUtils.mapChunkPositionFromDir[dir];
 
                     final mapTiles = createTileLayer(tileMap, 'walls', { x: x * ROOM_SIZE.width + chunkPos.x, y: y * ROOM_SIZE.height + chunkPos.y });
+
                     walls.add(mapTiles);
                 }
 
@@ -76,6 +82,9 @@ class PlayState extends FlxState {
 
             rooms.push(row);
         }
+
+        player = new Player(0, 0, this);
+        add(player);
 
         add(new Hud());
 
