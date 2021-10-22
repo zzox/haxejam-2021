@@ -57,7 +57,7 @@ class PlayState extends FlxState {
 
         rooms = [];
         for (x in 0...size) {
-            final row = [];
+            final column = [];
 
             for (y in 0...size) {
                 final room = map.getRoom({ x: x, y: y });
@@ -69,13 +69,15 @@ class PlayState extends FlxState {
                 // collidable items
                 walls.add(createTileLayer(roomTilemap, 'walls', { x: x * ROOM_SIZE.width, y: y * ROOM_SIZE.height }));
 
-                // TODO: add item squares positions to Room obj
                 final roomItems = Utils.shuffle(getRoomItems(roomTilemap));
 
                 if (room.end) {
                     final endItemPos = roomItems.shift();
 
-                    endItem = new FlxSprite(endItemPos.x, endItemPos.y);
+                    endItem = new FlxSprite(
+                        x * ROOM_SIZE.width + endItemPos.x,
+                        y * ROOM_SIZE.height + endItemPos.y
+                    );
                     endItem.loadGraphic(AssetPaths.ladder__png);
                     endItem.offset.set(7, 7);
                     endItem.setSize(2, 2);
@@ -99,11 +101,11 @@ class PlayState extends FlxState {
                     currentRoomVec = { x: x, y: y };
                 }
 
-                row.push({ walls: walls, itemPositions: roomItems, enemies: [] });
+                column.push({ walls: walls, itemPositions: roomItems, enemies: [] });
                 add(walls);
             }
 
-            rooms.push(row);
+            rooms.push(column);
         }
 
         actors.add(player);
@@ -141,11 +143,11 @@ class PlayState extends FlxState {
                 cameraPos.x += ROOM_SIZE.width;
                 currentRoomVec.x++;
             case Up:
-                playerPos.y -= 18;
+                playerPos.y -= 15;
                 cameraPos.y -= ROOM_SIZE.height;
                 currentRoomVec.y--;
             case Down:
-                playerPos.y += 18;
+                playerPos.y += 15;
                 cameraPos.y += ROOM_SIZE.height;
                 currentRoomVec.y++;
         }

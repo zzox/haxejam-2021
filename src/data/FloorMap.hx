@@ -12,8 +12,7 @@ typedef RoomPlan = {
 }
 
 class FloorMap {
-    var rooms:Array<Array<RoomPlan>>;
-    var start:Vec2;
+    public var rooms:Array<Array<RoomPlan>>;
     var size:Int;
     var minLength:Int;
     var endFound:Bool;
@@ -21,24 +20,23 @@ class FloorMap {
     public function new (size:Int) {
         this.size = size;
         minLength = Math.floor(Math.pow(size, 2) / 2); // is this accurate? 
+        trace(minLength);
         rooms = [];
 
         // gen 2d array
         for (x in 0...size) {
-            final row = [];
+            final column = [];
 
             for (y in 0...size) {
-                row.push({ start: false, end: false, x: x, y: y, connects: [] });
+                column.push({ start: false, end: false, x: x, y: y, connects: [] });
             }
 
-            rooms.push(row);
+            rooms.push(column);
         }
     }
 
     public function generate(startingVec2:Null<Vec2>) {
         var vec: Vec2 = startingVec2 != null ? startingVec2 : Utils.randomVec2(size);
-        start = vec;
-
         expandRoom(vec, 0);
     }
 
@@ -48,20 +46,32 @@ class FloorMap {
         curRoom.depth = depth;
         curRoom.start = depth == 0;
 
-        // tag the ending room
-        if (depth == minLength && !endFound) {
-            curRoom.end = true;
-            endFound = true;
-        }
-
         // shuffle room exits
-        var roomExits = Utils.shuffle([Left, Right, Up, Down]);
-        var exitableExits = roomExits.filter(roomExit -> {
+        final roomExits = Utils.shuffle([Left, Right, Up, Down]);
+        final exitableExits = roomExits.filter(roomExit -> {
+            final exitVec = Utils.vecFromDir({ x: curRoom.x, y: curRoom.y }, roomExit);
+            final room = getRoom(exitVec);
+            return room != null && room.depth == null;
+        });
+
+        // exits that we can maybe connect to
+        final potentialExits = roomExits.filter(roomExit -> {
             final exitVec = Utils.vecFromDir({ x: curRoom.x, y: curRoom.y }, roomExit);
             return getRoom(exitVec) != null;
         });
 
-        for (exit in exitableExits) {
+        // chance to skip after the length
+        final skipExit = exitableExits.length > 0 && Math.random() < size * 0.2;
+
+        // tag the ending room
+        if (depth >= minLength && !endFound && !skipExit) {
+            curRoom.end = true;
+            endFound = true;
+        }
+
+        trace(roomVec2, exitableExits.length, depth, minLength, endFound);
+
+        for (exit in potentialExits) {
             final exitVec = Utils.vecFromDir({ x: curRoom.x, y: curRoom.y }, exit);
             var exitRoom = getRoom(exitVec);
 
@@ -74,9 +84,16 @@ class FloorMap {
 
                 // recurse
                 expandRoom({ x: exitRoom.x, y: exitRoom.y }, ++depth);
+            } else {
+                // TODO: connect to already gotten rooms only if good enough chance and not the end????
+                // final potentialNextRoom = getRoom({ x: exitRoom.x, y: exitRoom.y });
+                // if (depth + potentialNextRoom.depth < Math.pow(minLength, 2) && Math.random() < 0.5) {
+                //     // create exits from both sides.
+                //     curRoom.connects.push(exit);
+                //     potentialNextRoom.connects.push(Utils.flipDir(exit));
+                // }
             }
 
-            // TODO: connect to already gotten rooms only if good enough chance and not the end????
         }
     }
 
