@@ -13,8 +13,8 @@ enum abstract SwordStage(String) to String {
 
 class Sword extends FlxGroup {
     //MD:?
-    static inline final SWING_TIME = 1;
-    static inline final START_SWING_TIME = .5;
+    static inline final SWING_TIME = 0.4;
+    static inline final START_SWING_TIME = 0.2;
 
     var parent:Player;
     public var state:SwordStage;
@@ -35,7 +35,7 @@ class Sword extends FlxGroup {
         swordSprite.animation.add(Hold, [2]);
         swingSprite = new FlxSprite();
         swingSprite.makeGraphic(12, 12);
-        // swingSprite.visible = false; // always invisible
+        swingSprite.visible = false; // always invisible
         add(swordSprite);
         add(swingSprite);
 
@@ -45,8 +45,6 @@ class Sword extends FlxGroup {
     }
 
     override function update (elapsed:Float) {
-        super.update(elapsed);
-
         if (state != Hilt) {
             swingTime -= elapsed;
             setSwordPosition();
@@ -60,6 +58,8 @@ class Sword extends FlxGroup {
                 state = Swing;
             }
         }
+
+        super.update(elapsed);
     }
 
     public function swing () {

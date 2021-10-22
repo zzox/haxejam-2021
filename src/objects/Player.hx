@@ -9,6 +9,7 @@ typedef HoldsObj = {
     var right:Float;
     var up:Float;
     var down:Float;
+    var swing:Float;
 }
 
 class Player extends FlxSprite {
@@ -21,7 +22,8 @@ class Player extends FlxSprite {
         left: 0.,
         right: 0.,
         up: 0.,
-        down: 0.
+        down: 0.,
+        swing: 0.
     };
 
     public var sword:Sword;
@@ -55,11 +57,20 @@ class Player extends FlxSprite {
         Checks inputs and updates state. Updates left/right + up/down velocity.
     **/
     function handleInputs (elapsed:Float) {
+        var justReleased = false;
         if (FlxG.keys.pressed.Z) {
+            holds.swing += elapsed;
             sword.swing();
             // TODO: allow for buffer
         } else {
             sword.release();
+
+            if (holds.swing != 0) {
+                justReleased = true;
+                trace('justReleased', sword.state);
+            }
+
+            holds.swing = 0;
         }
 
         var controlsPressed = {
@@ -72,8 +83,19 @@ class Player extends FlxSprite {
         lrVel = 0;
         udVel = 0;
 
+        // if swinging, we have no vel.
+        if (sword.state == Start || sword.state == Swing) {
+            return;
+        }
+
+        var canTurn = false;
+        if (sword.state == Hilt) {
+            canTurn = true;
+        }
+
         if (controlsPressed.left) {
-            if (holds.left == 0) {
+            // if we just released the sword, or we just pressed a key
+            if (justReleased || (holds.left == 0 && canTurn)) {
                 facingDir = Left;
             }
 
@@ -84,7 +106,7 @@ class Player extends FlxSprite {
         }
 
         if (controlsPressed.right) {
-            if (holds.right == 0) {
+            if (justReleased || (holds.right == 0 && canTurn)) {
                 facingDir = Right;
             }
 
@@ -103,7 +125,7 @@ class Player extends FlxSprite {
         }
 
         if (controlsPressed.up) {
-            if (holds.up == 0) {
+            if (justReleased || (holds.up == 0 && canTurn)) {
                 facingDir = Up;
             }
 
@@ -114,7 +136,7 @@ class Player extends FlxSprite {
         }
 
         if (controlsPressed.down) {
-            if (holds.down == 0) {
+            if (justReleased || (holds.down == 0 && canTurn)) {
                 facingDir = Down;
             }
 
