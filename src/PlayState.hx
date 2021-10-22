@@ -31,6 +31,7 @@ class PlayState extends FlxState {
     var currentRoomVec:Vec2;
     var player:Player;
     var actors:FlxGroup;
+    var endItem:FlxSprite;
 
     public var movingRoom:Bool = false;
 
@@ -70,6 +71,13 @@ class PlayState extends FlxState {
 
                 if (room.end) {
                     roomItems.map((item:Vec2) -> { trace(item); return null; });
+                    final endItemPos = roomItems.shift();
+
+                    endItem = new FlxSprite(endItemPos.x, endItemPos.y);
+                    endItem.loadGraphic(AssetPaths.ladder__png);
+                    endItem.offset.set(7, 7);
+                    endItem.setSize(2, 2);
+                    actors.add(endItem);
                 }
 
                 // add open or closed walls
@@ -89,7 +97,7 @@ class PlayState extends FlxState {
                     currentRoomVec = { x: x, y: y };
                 }
 
-                row.push({ walls: walls, enemies: [] });
+                row.push({ walls: walls, itemPositions: roomItems, enemies: [] });
                 add(walls);
             }
 
@@ -147,6 +155,8 @@ class PlayState extends FlxState {
     }
 
     function checkExits () {
+        FlxG.overlap(player, endItem, nextFloor);
+
         if (player.x < currentRoomVec.x * ROOM_SIZE.width) {
             exitRoom(Left);
             return;
@@ -166,6 +176,14 @@ class PlayState extends FlxState {
             exitRoom(Down);
             return;
         }
+    }
+
+    function nextFloor (_p:Player, _d:FlxSprite) {
+        trace('exiting');
+
+        // Pause movement
+        // timer for next level
+        // curtains
     }
 
     // TODO: change to room set function
