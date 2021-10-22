@@ -1,9 +1,10 @@
 package;
 
+import data.Game;
 import flixel.FlxG;
 import flixel.FlxState;
-import flixel.system.scaleModes.PixelPerfectScaleMode;
 import flixel.graphics.frames.FlxBitmapFont;
+import flixel.system.scaleModes.PixelPerfectScaleMode;
 import flixel.text.FlxBitmapText;
 import openfl.Assets;
 
@@ -32,9 +33,10 @@ class PreState extends FlxState {
 
         add(text);
     }
-    
+
     override public function update (elapsed:Float) {
         if (FlxG.keys.anyJustPressed([SPACE, Z])) {
+            Game.inst.newGame(SysTower);
             startGame();
         }
     }

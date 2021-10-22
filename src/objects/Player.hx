@@ -51,8 +51,6 @@ class Player extends FlxSprite {
 
         velocity.set(lrVel * VELOCITY, udVel * VELOCITY);
 
-        trace('facing: $facingDir');
-
         super.update(elapsed);
     }
 

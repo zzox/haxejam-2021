@@ -35,7 +35,7 @@ class FloorMap {
         }
     }
 
-    public function generate(?startingVec2:Vec2) {
+    public function generate(startingVec2:Null<Vec2>) {
         var vec: Vec2 = startingVec2 != null ? startingVec2 : Utils.randomVec2(size);
         start = vec;
 

@@ -1,6 +1,8 @@
 package;
 
 import data.FloorMap;
+import data.Game;
+import data.Towers;
 import data.Utils;
 import display.Hud;
 import flixel.FlxG;
@@ -41,10 +43,11 @@ class PlayState extends FlxState {
         camera.pixelPerfectRender = true;
         bgColor = 0xff073642;
 
-        // MD:
-        final size = 2;
+        trace(Game.inst.floor);
+        final tower = Towers.data[Game.inst.tower];
+        final size = tower.size;
         final map = new FloorMap(size);
-        map.generate();
+        map.generate(Game.inst.startVec);
 
         // make player, add after floors
         player = new Player(0, 0, this);
@@ -70,7 +73,6 @@ class PlayState extends FlxState {
                 final roomItems = Utils.shuffle(getRoomItems(roomTilemap));
 
                 if (room.end) {
-                    roomItems.map((item:Vec2) -> { trace(item); return null; });
                     final endItemPos = roomItems.shift();
 
                     endItem = new FlxSprite(endItemPos.x, endItemPos.y);
@@ -179,11 +181,12 @@ class PlayState extends FlxState {
     }
 
     function nextFloor (_p:Player, _d:FlxSprite) {
-        trace('exiting');
+        Game.inst.nextLevel(currentRoomVec);
+        FlxG.switchState(new PlayState());
 
-        // Pause movement
-        // timer for next level
-        // curtains
+        // TODO: Pause movement
+        // TODO: timer for next level
+        // TODO: curtains
     }
 
     // TODO: change to room set function
