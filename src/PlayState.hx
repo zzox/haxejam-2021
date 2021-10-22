@@ -7,8 +7,9 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.editors.tiled.TiledMap;
+import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.addons.editors.tiled.TiledTileLayer;
-import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxGroup;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxTween;
@@ -29,6 +30,7 @@ class PlayState extends FlxState {
     var rooms:Array<Array<Room>>;
     var currentRoomVec:Vec2;
     var player:Player;
+    var actors:FlxGroup;
 
     public var movingRoom:Bool = false;
 
@@ -46,6 +48,9 @@ class PlayState extends FlxState {
         // make player, add after floors
         player = new Player(0, 0, this);
 
+        // actor group, combined with player to have y depth sorting
+        actors = new FlxGroup();
+
         rooms = [];
         for (x in 0...size) {
             final row = [];
@@ -61,6 +66,11 @@ class PlayState extends FlxState {
                 walls.add(createTileLayer(roomTilemap, 'walls', { x: x * ROOM_SIZE.width, y: y * ROOM_SIZE.height }));
 
                 // TODO: add item squares positions to Room obj
+                final roomItems = Utils.shuffle(getRoomItems(roomTilemap));
+
+                if (room.end) {
+                    roomItems.map((item:Vec2) -> { trace(item); return null; });
+                }
 
                 // add open or closed walls
                 for (dir in DIRS) {
@@ -86,7 +96,8 @@ class PlayState extends FlxState {
             rooms.push(row);
         }
 
-        add(player);
+        actors.add(player);
+        add(actors);
         add(player.sword);
 
         add(new Hud());
@@ -164,6 +175,17 @@ class PlayState extends FlxState {
         final x = currentRoomVec.x * ROOM_SIZE.width;
         final y = currentRoomVec.y * ROOM_SIZE.height;
         FlxG.worldBounds.set(x, y, ROOM_SIZE.width, ROOM_SIZE.height);
+    }
+
+    // can maybe `cast` better
+    function getRoomItems (map:TiledMap):Array<Vec2> {
+        final items = cast(map.getLayer('items'), TiledObjectLayer).objects;
+        return items.map(item -> {
+            return {
+                x: item.x,
+                y: item.y
+            };
+        });
     }
 
     function createTileLayer (map:TiledMap, layerName:String, pos:Vec2):Null<FlxTilemap> {
