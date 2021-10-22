@@ -1,5 +1,6 @@
 package objects;
 
+import data.Utils;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
@@ -13,15 +14,17 @@ typedef HoldsObj = {
 class Player extends FlxSprite {
     static final VELOCITY = 60;
 
+    public var facingDir:Dir = Down;
     var lrVel:Int = 0;
     var udVel:Int = 0;
-
     var holds:HoldsObj = {
         left: 0.,
         right: 0.,
         up: 0.,
         down: 0.
     };
+
+    public var sword:Sword;
 
     var scene:PlayState;
 
@@ -31,6 +34,7 @@ class Player extends FlxSprite {
         makeGraphic(8, 12, 0xfffdf6e3);
 
         this.scene = scene;
+        sword = new Sword(this);
     }
 
     override public function update (elapsed:Float) {
@@ -51,6 +55,13 @@ class Player extends FlxSprite {
         Checks inputs and updates state. Updates left/right + up/down velocity.
     **/
     function handleInputs (elapsed:Float) {
+        if (FlxG.keys.pressed.Z) {
+            sword.swing();
+            // TODO: allow for buffer
+        } else {
+            sword.release();
+        }
+
         var controlsPressed = {
             left: FlxG.keys.pressed.LEFT,
             right: FlxG.keys.pressed.RIGHT,
@@ -62,6 +73,10 @@ class Player extends FlxSprite {
         udVel = 0;
 
         if (controlsPressed.left) {
+            if (holds.left == 0) {
+                facingDir = Left;
+            }
+
             lrVel = -1;
             holds.left += elapsed;
         } else {
@@ -69,6 +84,10 @@ class Player extends FlxSprite {
         }
 
         if (controlsPressed.right) {
+            if (holds.right == 0) {
+                facingDir = Right;
+            }
+
             lrVel = 1;
             holds.right += elapsed;
         } else {
@@ -84,6 +103,10 @@ class Player extends FlxSprite {
         }
 
         if (controlsPressed.up) {
+            if (holds.up == 0) {
+                facingDir = Up;
+            }
+
             udVel = -1;
             holds.up += elapsed;
         } else {
@@ -91,6 +114,10 @@ class Player extends FlxSprite {
         }
 
         if (controlsPressed.down) {
+            if (holds.down == 0) {
+                facingDir = Down;
+            }
+
             udVel = 1;
             holds.down += elapsed;
         } else {

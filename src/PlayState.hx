@@ -43,6 +43,9 @@ class PlayState extends FlxState {
         final map = new FloorMap(size);
         map.generate();
 
+        // make player, add after floors
+        player = new Player(0, 0, this);
+
         rooms = [];
         for (x in 0...size) {
             final row = [];
@@ -83,8 +86,8 @@ class PlayState extends FlxState {
             rooms.push(row);
         }
 
-        player = new Player(0, 0, this);
         add(player);
+        add(player.sword);
 
         add(new Hud());
 
