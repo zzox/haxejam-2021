@@ -5,7 +5,7 @@
  </tileset>
  <layer id="1" name="walls" width="12" height="1">
   <data encoding="csv">
-1,1,1,1,1,1,1,1,1,1,1,1
+9,2,2,2,2,2,2,2,2,2,2,10
 </data>
  </layer>
 </map>
