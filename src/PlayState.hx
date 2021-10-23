@@ -5,6 +5,7 @@ import data.Game;
 import data.Towers;
 import data.Utils;
 import display.Hud;
+import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -16,11 +17,12 @@ import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxTween;
 import maps.MapUtils;
+import objects.Enemy;
 import objects.Player;
 
 typedef Room = {
     var walls:FlxTypedGroup<FlxTilemap>;
-    var enemies:Array<FlxSprite>;
+    var enemies:Array<Enemy>;
 }
 
 class PlayState extends FlxState {
@@ -33,6 +35,7 @@ class PlayState extends FlxState {
     var currentRoomVec:Vec2;
     var player:Player;
     var actors:FlxGroup;
+    var enemies:FlxGroup;
     var endItem:FlxSprite;
 
     public var movingRoom:Bool = false;
@@ -55,6 +58,9 @@ class PlayState extends FlxState {
         // actor group, combined with player to have y depth sorting
         actors = new FlxGroup();
 
+        // actor group, combined with player to have y depth sorting
+        enemies = new FlxGroup();
+
         rooms = [];
         for (x in 0...size) {
             final column = [];
@@ -71,6 +77,8 @@ class PlayState extends FlxState {
 
                 final roomItems = Utils.shuffle(getRoomItems(roomTilemap));
 
+                var numEnemies = Utils.randomInWindow(tower.fullnessWindow);
+
                 if (room.end) {
                     final endItemPos = roomItems.shift();
 
@@ -82,6 +90,8 @@ class PlayState extends FlxState {
                     endItem.offset.set(7, 7);
                     endItem.setSize(2, 2);
                     actors.add(endItem);
+
+                    numEnemies--;
                 }
 
                 // add open or closed walls
@@ -99,21 +109,37 @@ class PlayState extends FlxState {
                 if (room.start) {
                     player.setPosition(x * ROOM_SIZE.width + 100, y * ROOM_SIZE.height + 80);
                     currentRoomVec = { x: x, y: y };
+                    numEnemies = 0;
                 }
 
-                column.push({ walls: walls, itemPositions: roomItems, enemies: [] });
+                final roomEnemies = [];
+                for (i in 0...numEnemies) {
+                    final enemyPos = roomItems[i];
+
+                    final enemy = new Enemy(
+                        x * ROOM_SIZE.width + enemyPos.x,
+                        y * ROOM_SIZE.height + enemyPos.y,
+                        player
+                    );
+                    enemies.add(enemy);
+                    roomEnemies.push(enemy);
+                }
+
+                column.push({ walls: walls, itemPositions: roomItems, enemies: roomEnemies });
                 add(walls);
             }
 
             rooms.push(column);
         }
 
+        actors.add(enemies);
         actors.add(player);
         add(actors);
         add(player.sword);
 
         add(new Hud());
 
+        deactivateEnemies();
         setBounds();
         FlxG.camera.scroll.set(currentRoomVec.x * ROOM_SIZE.width, currentRoomVec.y * ROOM_SIZE.height - HUD_HEIGHT);
     }
@@ -125,8 +151,17 @@ class PlayState extends FlxState {
 
         if (!movingRoom) {
             FlxG.collide(currentRoom.walls, player);
+            FlxG.collide(currentRoom.walls, enemies);
+            FlxG.collide(enemies, enemies);
+            FlxG.overlap(enemies, player, enemyHurtPlayer);
+            // FlxG.collide(enemies, blockers);
+
             checkExits();
         }
+    }
+
+    function enemyHurtPlayer (enemy:Enemy, player:Player) {
+        trace('enemy hurt player');
     }
 
     function exitRoom (dir:Dir) {
@@ -155,6 +190,7 @@ class PlayState extends FlxState {
         FlxTween.tween(player, playerPos, MOVE_ROOM_TIME, { onComplete: setBounds });
         FlxTween.tween(FlxG.camera.scroll, cameraPos, MOVE_ROOM_TIME);
 
+        deactivateEnemies();
         movingRoom = true;
     }
 
@@ -191,13 +227,21 @@ class PlayState extends FlxState {
         // TODO: curtains
     }
 
-    // TODO: change to room set function
-    // activate physics, enemies, etc.
     function setBounds (?_:FlxTween) {
         movingRoom = false;
         final x = currentRoomVec.x * ROOM_SIZE.width;
         final y = currentRoomVec.y * ROOM_SIZE.height;
         FlxG.worldBounds.set(x, y, ROOM_SIZE.width, ROOM_SIZE.height);
+        activateEnemies();
+    }
+
+    function activateEnemies() {
+        final currentRoom = rooms[currentRoomVec.x][currentRoomVec.y];
+        for (enemy in currentRoom.enemies) { enemy.active = true; }
+    }
+
+    function deactivateEnemies() {
+        enemies.forEach((enemy:FlxBasic) -> { enemy.active = false; });
     }
 
     // can maybe `cast` better

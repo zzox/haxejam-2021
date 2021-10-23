@@ -12,7 +12,7 @@ typedef RoomPlan = {
 }
 
 class FloorMap {
-    public var rooms:Array<Array<RoomPlan>>;
+    var rooms:Array<Array<RoomPlan>>;
     var size:Int;
     var minLength:Int;
     var endFound:Bool;
@@ -20,7 +20,6 @@ class FloorMap {
     public function new (size:Int) {
         this.size = size;
         minLength = Math.floor(Math.pow(size, 2) / 2); // is this accurate? 
-        trace(minLength);
         rooms = [];
 
         // gen 2d array
@@ -68,8 +67,6 @@ class FloorMap {
             curRoom.end = true;
             endFound = true;
         }
-
-        trace(roomVec2, exitableExits.length, depth, minLength, endFound);
 
         for (exit in potentialExits) {
             final exitVec = Utils.vecFromDir({ x: curRoom.x, y: curRoom.y }, exit);

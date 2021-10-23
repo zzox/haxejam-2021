@@ -1,5 +1,7 @@
 package data;
 
+import data.Utils;
+
 enum TowerType {
     SysTower;
     IoTower;
@@ -9,9 +11,10 @@ enum TowerType {
 
 typedef Tower = {
     var size:Int;
-    var roomTypes: Array<String>;
-    var enemyTypes: Array<String>; // TODO: enemy type in enum
-    // TODO: room fullness window (-1 when a end is in there)
+    var roomTypes:Array<String>;
+    var enemyTypes:Array<String>; // TODO: enemy type in enum
+    var fullnessWindow:MinMax;
+    // TODO: room fullness window (-1 when a floor end is in there)
 }
 
 class Towers {
@@ -19,7 +22,8 @@ class Towers {
         SysTower => {
             size: 2,
             roomTypes: [],
-            enemyTypes: []
+            enemyTypes: [],
+            fullnessWindow: { min: 1, max: 2 }
         }
     ];
 }

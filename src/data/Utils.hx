@@ -12,6 +12,11 @@ typedef Vec2 = {
     var y:Int;
 }
 
+typedef MinMax = {
+    var min:Int;
+    var max:Int;
+}
+
 class Utils {
     public static inline function randomVec2 (squareSize:Int):Vec2
         return { x: Math.floor(Math.random() * squareSize), y: Math.floor(Math.random() * squareSize) }
@@ -42,4 +47,7 @@ class Utils {
 
         return res;
     }
+
+    public static inline function randomInWindow (window:MinMax):Int
+        return window.min + Math.round(Math.random() * (window.max - window.min));
 }
